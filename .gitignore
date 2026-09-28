@@ -1,0 +1,7 @@
+# Source PDF stays local; the questions are already embedded in index.html
+*.pdf
+
+# OS files
+Thumbs.db
+desktop.ini
+.DS_Store
