@@ -6,7 +6,8 @@ An unofficial practice page for the Canton of Zürich naturalisation knowledge t
 
 ## Using it
 
-- Hover over a question to read it in English. On a phone, tap **EN** on the card.
+- Hover over a question to read it in English, or switch on **English inline** to show every translation (the way to go on a phone).
+- The ⓘ icon on each card shows the question number, topic, PDF page and how often you got it wrong.
 - Tick the correct answer and the question disappears. A wrong answer turns red and puts the question on the *To review* list, where it stays until you get it right on the first try.
 - Show the questions in PDF order or shuffled, filter by topic or by level (Bund, Kanton, Gemeinde), and optionally shuffle the answers.
 - Progress is stored in your browser (localStorage), so each browser and device keeps its own.

@@ -113,7 +113,7 @@ button { font: inherit; color: inherit; }
 .eyebrow svg { width: 14px; height: 14px; flex: none; }
 h1 { margin: 12px 0 14px; font-weight: 800; font-stretch: 112%; font-size: clamp(36px, 7vw, 62px); line-height: .95; letter-spacing: -.02em; text-wrap: balance; }
 .lede { margin: 0; max-width: 60ch; color: var(--ink-2); font-size: 16px; line-height: 1.55; text-wrap: pretty; }
-.kbd { font: 400 12px/1 var(--f-mono); letter-spacing: .06em; padding: 2px 5px; border: 1px solid var(--line-2); border-radius: 4px; color: var(--ink); white-space: nowrap; }
+.lede b { font-weight: 650; color: var(--ink); white-space: nowrap; }
 .score { display: grid; gap: 12px; justify-items: end; }
 .stats { display: flex; align-items: flex-end; gap: 30px; }
 .stat { display: grid; gap: 6px; }
@@ -187,7 +187,7 @@ h1 { margin: 12px 0 14px; font-weight: 800; font-stretch: 112%; font-size: clamp
 
 /* ---------- deck: cards + English lane ---------- */
 .deck { margin-top: 16px; }
-@media (min-width: 1120px) { .deck { display: grid; grid-template-columns: 720px minmax(0, 1fr); gap: 36px; align-items: start; } }
+@media (min-width: 1120px) { .deck { display: grid; grid-template-columns: minmax(0, 580px) minmax(0, 1fr); gap: 24px; align-items: start; } }
 .list { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .lane { display: none; }
 @media (min-width: 1120px) { .lane { display: block; align-self: stretch; } }
@@ -195,30 +195,31 @@ h1 { margin: 12px 0 14px; font-weight: 800; font-stretch: 112%; font-size: clamp
 .lane-hint b { display: block; margin-bottom: 4px; font: 400 11px/1.2 var(--f-mono); font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: var(--blue); }
 .glossing .lane-hint { opacity: 0; }
 
-.card { position: relative; padding: 14px 20px 18px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-1); content-visibility: auto; contain-intrinsic-size: auto 300px; transition: border-color .15s; }
+.card { position: relative; padding: 16px 20px 18px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-1); content-visibility: auto; contain-intrinsic-size: auto 280px; transition: border-color .15s; }
 .card.is-glossed { border-color: var(--blue); }
 .card.is-solved { border-color: var(--green-line); }
-.meta { display: flex; align-items: center; gap: 10px; min-width: 0; margin-bottom: 10px; font: 400 12px/1.3 var(--f-mono); color: var(--ink-3); }
-.num { color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
-.where { display: inline-flex; align-items: center; gap: 6px; min-width: 0; font: 400 12.5px/1.3 var(--f-sans); color: var(--ink-3); }
-.where svg { width: 12px; height: 12px; flex: none; }
-.where-t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.flags { display: inline-flex; gap: 8px; white-space: nowrap; }
-.f-done { display: none; color: var(--green); }
-.is-done .f-done { display: inline; }
-.f-miss { color: var(--red); }
-.f-miss:empty { display: none; }
-.pg { margin-left: auto; white-space: nowrap; }
-.en-btn { all: unset; cursor: pointer; flex: none; padding: 4px 7px; border: 1px solid var(--line-2); border-radius: 4px; font: 400 11px/1 var(--f-mono); letter-spacing: .08em; color: var(--ink-2); }
-.en-btn:hover { border-color: var(--blue); color: var(--blue); }
-.en-btn[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: var(--on-blue); }
-.en-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
-.all-en .en-btn { display: none; }
-@media (hover: none) { .en-btn { padding: 6px 10px; } }
+
+/* question + info icon */
+.qrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 12px; }
+.info { position: relative; }
+.info-btn { all: unset; cursor: help; display: grid; place-items: center; width: 24px; height: 24px; margin-right: -4px; border-radius: 50%; color: var(--ink-3); transition: color .12s, background-color .12s; }
+.info-btn svg { width: 16px; height: 16px; }
+.info-btn:hover, .info.open .info-btn { color: var(--blue); background: var(--blue-wash); }
+.info-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+.tip { position: absolute; top: calc(100% + 6px); right: -6px; z-index: 5; display: grid; gap: 4px; width: max-content; max-width: min(300px, calc(100vw - 64px)); padding: 10px 12px; background: var(--surface); border: 1px solid var(--line-2); border-radius: var(--radius); box-shadow: var(--shadow-2); font: 400 13px/1.4 var(--f-sans); color: var(--ink-2); opacity: 0; visibility: hidden; transition: opacity .12s ease, visibility 0s linear .12s; }
+@media (hover: hover) { .info:hover .tip { opacity: 1; visibility: visible; transition: opacity .12s ease, visibility 0s; } }
+.info.open .tip, .info-btn:focus-visible + .tip { opacity: 1; visibility: visible; transition: opacity .12s ease, visibility 0s; }
+.tip-num { font: 400 12px/1.3 var(--f-mono); color: var(--ink); }
+.tip-where { display: flex; align-items: center; gap: 6px; }
+.tip-where svg { width: 12px; height: 12px; flex: none; }
+.tip-en { font: italic 400 13px/1.35 var(--f-serif); color: var(--ink-3); }
+.tip-state { display: grid; gap: 2px; margin-top: 2px; padding-top: 6px; border-top: 1px solid var(--line); font: 400 12px/1.3 var(--f-mono); }
+.st-done { color: var(--green); }
+.st-miss { color: var(--red); }
 
 .q { margin: 0; font-weight: 650; font-size: 18px; line-height: 1.36; letter-spacing: -.005em; text-wrap: pretty; hyphens: auto; -webkit-hyphens: auto; }
 .en { display: none; }
-.show-en .en, .all-en .en { display: block; }
+.all-en .en { display: block; }
 .q .en { margin-top: 6px; font: italic 400 16.5px/1.4 var(--f-serif); letter-spacing: 0; color: var(--ink-2); }
 .qimg { margin: 12px 0 0; }
 .qimg img { display: block; width: auto; max-height: 300px; border-radius: 4px; }
@@ -258,7 +259,7 @@ h1 { margin: 12px 0 14px; font-weight: 800; font-stretch: 112%; font-size: clamp
 
 .card.shake { animation: shake .32s ease; }
 @keyframes shake { 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(2px); } }
-.card.collapsing { overflow: hidden; opacity: 0; padding-block: 0; margin-top: -12px; border-width: 0; box-shadow: none; transition: height .3s ease, padding .3s ease, margin .3s ease, border-width .3s ease, opacity .2s ease; }
+.card.collapsing { overflow: hidden; opacity: 0; padding-block: 0; margin-top: -12px; border-width: 0; box-shadow: none; transition: height .1s ease, padding .1s ease, margin .1s ease, border-width .1s ease, opacity .07s ease; }
 
 .empty { padding: 26px 24px; background: var(--surface); border: 1px dashed var(--line-2); border-radius: var(--radius); }
 .empty h3 { margin: 0 0 6px; font-weight: 750; font-stretch: 108%; font-size: 21px; line-height: 1.2; }
@@ -269,17 +270,16 @@ h1 { margin: 12px 0 14px; font-weight: 800; font-stretch: 112%; font-size: clamp
 .btn.primary { background: var(--blue); border-color: var(--blue); color: var(--on-blue); }
 .btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
-/* ---------- floating English gloss ---------- */
-.gloss { position: fixed; top: 0; left: 0; z-index: 15; width: 340px; max-width: calc(100vw - 32px); padding: 12px 16px 14px; background: var(--surface); border: 1px solid var(--blue); border-radius: var(--radius); box-shadow: var(--shadow-2); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease, transform .18s cubic-bezier(.2, .7, .2, 1), visibility 0s linear .14s; }
+/* ---------- floating English gloss: mirrors the card's box model so rows line up ---------- */
+.gloss { position: fixed; top: 0; left: 0; z-index: 15; width: 340px; max-width: calc(100vw - 32px); padding: 16px 20px 18px; background: var(--surface); border: 1px solid var(--blue); border-radius: var(--radius); box-shadow: var(--shadow-2); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease, transform .18s cubic-bezier(.2, .7, .2, 1), visibility 0s linear .14s; }
 .gloss.on { opacity: 1; visibility: visible; transition: opacity .14s ease, transform .18s cubic-bezier(.2, .7, .2, 1), visibility 0s; }
 .gloss.jump { transition: opacity .14s ease, visibility 0s; }
-.g-head { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; font: 400 11px/1.2 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--blue); }
-.g-head span + span { letter-spacing: .04em; text-transform: none; color: var(--ink-3); }
-.g-q { margin: 0; font: italic 500 17px/1.38 var(--f-serif); color: var(--ink); }
-.g-list { display: grid; gap: 6px; margin: 10px 0 0; padding: 10px 0 0; list-style: none; border-top: 1px solid var(--line); }
-.g-list li { display: grid; grid-template-columns: 12px minmax(0, 1fr); gap: 10px; font: italic 400 15px/1.4 var(--f-serif); color: var(--ink-2); }
-.g-list b { font: 400 12.5px/21px var(--f-mono); color: var(--ink-3); }
-.g-note { margin: 8px 0 0; font: 400 12px/1.3 var(--f-mono); color: var(--ink-3); }
+.g-tab { position: absolute; top: -8px; left: 14px; padding: 0 6px; background: var(--surface); font: 400 10.5px/16px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--blue); }
+.g-q { margin: 0; font: italic 500 17px/24.5px var(--f-serif); color: var(--ink); }
+.g-list { display: grid; gap: 6px; margin: 14px 0 0; padding: 0; list-style: none; }
+.g-opt { display: grid; grid-template-columns: 12px minmax(0, 1fr); align-items: start; gap: 0 10px; padding: 9px 12px; background: var(--surface-2); border: 1px solid transparent; border-radius: 5px; font: italic 400 15px/22.5px var(--f-serif); color: var(--ink-2); }
+.g-opt b { font: 400 13px/22.5px var(--f-mono); color: var(--ink-3); }
+.g-note { margin: 14px 0 0; font: 400 12px/1.3 var(--f-mono); color: var(--ink-3); }
 
 .toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 40; display: flex; align-items: center; gap: 14px; padding: 7px 7px 7px 16px; background: var(--ink); color: var(--paper); border-radius: 8px; box-shadow: var(--shadow-2); font: 500 14px/1.2 var(--f-sans); white-space: nowrap; transform: translateX(-50%); }
 .toast button { all: unset; cursor: pointer; padding: 7px 12px; border-radius: 5px; font-weight: 650; background: color-mix(in srgb, var(--paper) 14%, transparent); }
@@ -290,11 +290,11 @@ h1 { margin: 12px 0 14px; font-weight: 800; font-stretch: 112%; font-size: clamp
 .foot p { margin: 0 0 6px; }
 
 @media (max-width: 520px) {
-  .card { padding: 12px 14px 14px; }
+  .card, .gloss { padding: 14px 14px 14px; }
   .q { font-size: 17px; }
   .txt { font-size: 15px; }
-  .opt { gap: 0 8px; padding: 9px 10px; }
-  .where .sec { display: none; }
+  .opt, .g-opt { padding: 9px 10px; }
+  .opt { gap: 0 8px; }
   .hero { font-size: 50px; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -309,7 +309,7 @@ h1 { margin: 12px 0 14px; font-weight: 800; font-stretch: 112%; font-size: clamp
     <div>
       <p class="eyebrow" lang="de"><svg viewBox="0 0 12 12" aria-hidden="true"><rect width="12" height="12" rx="1.5" fill="var(--flag-red)"/><path d="M5 2.4h2V5h2.6v2H7v2.6H5V7H2.4V5H5z" fill="#fff"/></svg><svg viewBox="0 0 12 12" aria-hidden="true"><rect x=".5" y=".5" width="11" height="11" rx="1.5" fill="#fff" stroke="var(--line-2)"/><path d="M.9.9l10.2 10.2H2.4A1.5 1.5 0 0 1 .9 9.6z" fill="var(--zh-blue)"/></svg>Einbürgerung · Kanton Zürich</p>
       <h1 lang="de">Grund&shy;kenntnis&shy;test</h1>
-      <p class="lede">An unofficial practice deck with all 350 questions from the canton’s official catalogue, in German. Hover over a question to read it in English (on a phone, tap <span class="kbd">EN</span>). Tick the right answer and the question disappears; wrong answers go on your review list.</p>
+      <p class="lede">An unofficial practice deck with all 350 questions from the canton’s official catalogue, in German. Hover over a question to read it in English, or switch on <b>English inline</b> to show every translation (handy on a phone). Tick the right answer and the question disappears; wrong answers go on your review list.</p>
     </div>
     <div class="score">
       <div class="stats">
@@ -764,6 +764,7 @@ h1 { margin: 12px 0 14px; font-weight: 800; font-stretch: 112%; font-size: clamp
     G: '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.6 6.2 6 2.3l4.4 3.9v4.4H1.6z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M5 10.6V7.9h2v2.7" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>'
   };
   const TICK = '<svg viewBox="0 0 12 12" aria-hidden="true"><path class="ok" d="M2.4 6.3 4.9 8.7 9.7 3.5"/><path class="no" d="M3.2 3.2l5.6 5.6M8.8 3.2 3.2 8.8"/></svg>';
+  const INFO = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 7.3v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.9" r=".95" fill="currentColor"/></svg>';
 
   /* ---------- saved state (per browser) ---------- */
   function load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
@@ -815,14 +816,18 @@ h1 { margin: 12px 0 14px; font-weight: 800; font-stretch: 112%; font-size: clamp
     c.setAttribute('aria-labelledby', 'qt' + q.i);
     const sec = SEC[q.s];
     c.innerHTML =
-      `<div class="meta">` +
-        `<span class="num">Nr.&nbsp;${q.i}</span>` +
-        `<span class="where" title="${esc(sec.en)} · ${LVL[q.l].en}">${ICON[q.l]}<span class="where-t">${q.u}<span class="sec"> ${esc(sec.de)}</span> · ${LVL[q.l].de}</span></span>` +
-        `<span class="flags"><span class="f-done" lang="en">✓ learned</span><span class="f-miss" lang="en"></span></span>` +
-        `<span class="pg" title="Page in the PDF">S.&nbsp;${q.p}</span>` +
-        `<button type="button" class="en-btn" lang="en" aria-pressed="false" title="Show the English translation">EN</button>` +
+      `<div class="qrow">` +
+        `<h2 class="q" id="qt${q.i}"><span class="de">${esc(q.q)}</span><span class="en" lang="en">${esc(q.qe)}</span></h2>` +
+        `<div class="info">` +
+          `<button type="button" class="info-btn" lang="en" aria-label="Details for question ${q.i}" aria-describedby="tip${q.i}">${INFO}</button>` +
+          `<div class="tip" id="tip${q.i}" role="tooltip">` +
+            `<span class="tip-num">Nr.&nbsp;${q.i} · S.&nbsp;${q.p}</span>` +
+            `<span class="tip-where">${ICON[q.l]}<span>${q.u} ${esc(sec.de)} · ${LVL[q.l].de}</span></span>` +
+            `<span class="tip-en" lang="en">${esc(sec.en)} · ${LVL[q.l].en}</span>` +
+            `<span class="tip-state" lang="en" hidden></span>` +
+          `</div>` +
+        `</div>` +
       `</div>` +
-      `<h2 class="q" id="qt${q.i}"><span class="de">${esc(q.q)}</span><span class="en" lang="en">${esc(q.qe)}</span></h2>` +
       (q.img ? `<figure class="qimg"><img src="${IMG[q.img]}" alt="${esc(q.alt)}" lang="en" decoding="async"></figure>` : '') +
       `<div class="opts${q.oi ? ' imgs' + (q.oi[0].startsWith('map') ? ' maps' : '') : ''}" role="group" aria-labelledby="qt${q.i}"></div>` +
       (q.credit ? `<p class="credit">${esc(q.credit)}</p>` : '');
@@ -841,10 +846,12 @@ h1 { margin: 12px 0 14px; font-weight: 800; font-stretch: 112%; font-size: clamp
     }).join('');
   }
   function paintFlags(c, q) {
-    c.classList.toggle('is-done', !!S.done[q.i]);
-    const m = S.miss[q.i] || 0, f = c.querySelector('.f-miss');
-    f.textContent = m ? `✕ ${m}` : '';
-    f.title = m ? `Answered wrong ${m}×` : '';
+    const m = S.miss[q.i] || 0, lines = [];
+    if (S.done[q.i]) lines.push('<span class="st-done">✓ Learned</span>');
+    if (m) lines.push(`<span class="st-miss">✕ Answered wrong ${m}×${S.review[q.i] ? ' · to review' : ''}</span>`);
+    const st = c.querySelector('.tip-state');
+    st.innerHTML = lines.join('');
+    st.hidden = !lines.length;
   }
   function resetCard(c) {
     c.classList.remove('is-solved', 'shake', 'collapsing', 'is-glossed');
@@ -995,7 +1002,7 @@ h1 { margin: 12px 0 14px; font-weight: 800; font-stretch: 112%; font-size: clamp
       if (hadFocus) focusNext(c);
       updateEmpty();
       showToast(slipped ? `Nr. ${q.i} cleared · still on your review list` : `✓ Nr. ${q.i} learned`, prev);
-    }), reduced.matches ? 250 : 560);
+    }), reduced.matches ? 85 : 190);
   }
   function collapse(c, done) {
     let finished = false;
@@ -1016,7 +1023,7 @@ h1 { margin: 12px 0 14px; font-weight: 800; font-stretch: 112%; font-size: clamp
     c.addEventListener('transitionend', onEnd);
     c.classList.add('collapsing');
     c.style.height = '0px';
-    setTimeout(finish, 520);
+    setTimeout(finish, 180);
   }
   function focusNext(c) {
     let n = c.nextElementSibling;
@@ -1079,19 +1086,23 @@ h1 { margin: 12px 0 14px; font-weight: 800; font-stretch: 112%; font-size: clamp
       else if (a === 'clear') { S.topic = 0; S.level = ''; save(); applyView(true); }
       else if (a === 'again') applyView(true);
       else if (a === 'reset') { askReset(); $('#resetConfirm').scrollIntoView({ block: 'center' }); }
-    } else if (b.classList.contains('en-btn')) {
-      const c = b.closest('.card'), on = !c.classList.contains('show-en');
-      c.classList.toggle('show-en', on);
-      b.setAttribute('aria-pressed', String(on));
-      if (glossCard === c) hideGloss();
+    } else if (b.classList.contains('info-btn')) {
+      const box = b.parentElement, open = !box.classList.contains('open');
+      closeTips(box);
+      box.classList.toggle('open', open);
     }
   });
+  // info tooltips: hover on desktop, tap to toggle on touch screens
+  function closeTips(except) { for (const t of $$('.info.open')) if (t !== except) t.classList.remove('open'); }
+  document.addEventListener('click', e => { if (!e.target.closest('.info')) closeTips(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTips(); });
   $('#sw-shuf').addEventListener('change', e => {
     S.shuf = e.target.checked; save();
     for (const q of Q) fillOpts(cards.get(q.i), q);
     applyView(false);
+    equaliseRows(true);
   });
-  $('#sw-en').addEventListener('change', e => { S.allEn = e.target.checked; save(); hideGloss(); syncControls(); });
+  $('#sw-en').addEventListener('change', e => { S.allEn = e.target.checked; save(); hideGloss(); syncControls(); equaliseRows(true); });
 
   function askReset() { $('#resetBtn').hidden = true; $('#resetConfirm').hidden = false; $('#resetNo').focus(); }
   function closeReset() { $('#resetConfirm').hidden = true; $('#resetBtn').hidden = false; }
@@ -1107,29 +1118,36 @@ h1 { margin: 12px 0 14px; font-weight: 800; font-stretch: 112%; font-size: clamp
   let glossCard = null, pending = null, showT = 0, hideT = 0, jumpT = 0;
   function fillGloss(c) {
     const q = byId.get(+c.dataset.id);
-    let html = `<div class="g-head"><span>English</span><span>Nr. ${q.i}</span></div><p class="g-q" lang="en">${esc(q.qe)}</p>`;
+    let html = `<span class="g-tab">English</span><p class="g-q" lang="en">${esc(q.qe)}</p>`;
     if (q.oi) html += '<p class="g-note">The answers are pictures.</p>';
-    else html += '<ol class="g-list" lang="en">' + c._order.map((o, pos) => `<li><b>${LETTERS[pos]}</b><span>${esc(q.oe[o])}</span></li>`).join('') + '</ol>';
+    else html += '<ol class="g-list" lang="en">' + c._order.map((o, pos) => `<li class="g-opt"><b>${LETTERS[pos]}</b><span>${esc(q.oe[o])}</span></li>`).join('') + '</ol>';
     gloss.innerHTML = html;
   }
-  function placeGloss() {
+  // Line the English rows up with the German ones: same start for the answer list,
+  // and each English answer row at least as tall as its German twin.
+  function alignGloss(c) {
+    const list = gloss.querySelector('.g-list');
+    if (!list) return;
+    const de = c.querySelectorAll('.opt'), en = list.children;
+    list.style.marginTop = '';
+    for (const li of en) li.style.minHeight = '';
+    const deStart = de[0].getBoundingClientRect().top - c.getBoundingClientRect().top;
+    const enStart = en[0].getBoundingClientRect().top - gloss.getBoundingClientRect().top;
+    if (deStart > enStart) list.style.marginTop = (parseFloat(getComputedStyle(list).marginTop) + deStart - enStart) + 'px';
+    for (let i = 0; i < en.length && i < de.length; i++) en[i].style.minHeight = de[i].getBoundingClientRect().height + 'px';
+  }
+  function placeGloss(realign) {
     const c = glossCard;
     if (!c) return;
     const r = c.getBoundingClientRect();
-    const barB = Math.max(0, bar.getBoundingClientRect().bottom);
     const inLane = wide.matches;
     let x, w;
     if (inLane) { const lr = lane.getBoundingClientRect(); x = lr.left; w = lr.width; }
     else { x = r.left; w = r.width; }
-    gloss.style.width = w + 'px';
-    const gh = gloss.offsetHeight;
-    let y;
-    if (inLane) {
-      y = r.top;
-      const minY = barB + 12;
-      if (y < minY) y = Math.min(minY, r.bottom - gh);
-      y = Math.min(y, innerHeight - gh - 12);
-    } else {
+    if (realign || gloss.style.width !== w + 'px') { gloss.style.width = w + 'px'; alignGloss(c); }
+    let y = r.top;   // in the lane: level with the card, so the rows sit side by side
+    if (!inLane) {
+      const gh = gloss.offsetHeight, barB = Math.max(0, bar.getBoundingClientRect().bottom);
       y = r.bottom + 8;
       if (y + gh > innerHeight - 8) { const up = r.top - gh - 8; if (up >= barB + 8) y = up; }
     }
@@ -1137,14 +1155,14 @@ h1 { margin: 12px 0 14px; font-weight: 800; font-stretch: 112%; font-size: clamp
   }
   function showGloss(c) {
     pending = null;
-    if (S.allEn || !canHover.matches || c.hidden || c._busy || c.classList.contains('show-en')) return;
+    if (S.allEn || !canHover.matches || c.hidden || c._busy) return;
     const wasOn = gloss.classList.contains('on');
     if (glossCard && glossCard !== c) glossCard.classList.remove('is-glossed');
     glossCard = c;
     c.classList.add('is-glossed');
     fillGloss(c);
     if (!wasOn) gloss.classList.add('jump');
-    placeGloss();
+    placeGloss(true);
     if (!wasOn) { void gloss.offsetWidth; gloss.classList.remove('jump'); }
     gloss.classList.add('on');
     page.classList.add('glossing');
@@ -1192,14 +1210,51 @@ h1 { margin: 12px 0 14px; font-weight: 800; font-stretch: 112%; font-size: clamp
     clearTimeout(jumpT);
     jumpT = setTimeout(() => gloss.classList.remove('jump'), 140);
   }, { passive: true });
-  addEventListener('resize', () => { if (glossCard) placeGloss(); });
-  wide.addEventListener('change', hideGloss);
+  /* ---------- equal row heights in the side-lane layout ---------- */
+  // Where an English row wraps onto more lines than its German twin, the German row
+  // gets the same height, so the rows always sit level. Measured once, off screen.
+  let eqW = -1, eqT = 0;
+  function equaliseRows(force) {
+    const on = wide.matches && canHover.matches && !S.allEn;
+    const w = on ? lane.getBoundingClientRect().width - 42 : 0;   // gloss content width (padding + border)
+    if (!force && w === eqW) return;
+    eqW = w;
+    for (const c of cards.values()) {
+      c.querySelector('.qrow').style.minHeight = '';
+      for (const o of c.querySelectorAll('.opt')) o.style.minHeight = '';
+    }
+    if (w > 0) {
+      const text = Q.filter(q => !q.oi);
+      const box = document.createElement('div');
+      box.setAttribute('aria-hidden', 'true');
+      box.style.cssText = `position:absolute;left:-10000px;top:0;width:${w}px;visibility:hidden;pointer-events:none`;
+      box.innerHTML = text.map(q => `<div><p class="g-q">${esc(q.qe)}</p><ol class="g-list">` +
+        cards.get(q.i)._order.map(o => `<li class="g-opt"><b>a</b><span>${esc(q.oe[o])}</span></li>`).join('') + '</ol></div>').join('');
+      page.append(box);
+      const sizes = Array.from(box.children, m => [m.firstElementChild.getBoundingClientRect().height, Array.from(m.lastElementChild.children, li => li.getBoundingClientRect().height)]);
+      box.remove();
+      text.forEach((q, k) => {
+        const c = cards.get(q.i);
+        c.querySelector('.qrow').style.minHeight = sizes[k][0] + 'px';
+        c.querySelectorAll('.opt').forEach((o, i) => { o.style.minHeight = sizes[k][1][i] + 'px'; });
+      });
+    }
+    if (glossCard) placeGloss(true);
+  }
+  addEventListener('resize', () => {
+    if (glossCard) placeGloss(true);
+    clearTimeout(eqT);
+    eqT = setTimeout(() => equaliseRows(false), 150);
+  });
+  wide.addEventListener('change', () => { hideGloss(); equaliseRows(true); });
+  canHover.addEventListener('change', () => equaliseRows(true));
 
   if ('ResizeObserver' in window) new ResizeObserver(() => page.style.setProperty('--bar-h', bar.offsetHeight + 'px')).observe(bar);
 
   /* ---------- start ---------- */
   for (const q of Q) cards.set(q.i, buildCard(q));
   applyView(false);
+  (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => equaliseRows(true));
 })();
 </script>
 </body>
