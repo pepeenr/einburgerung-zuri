@@ -250,9 +250,9 @@ h1 { margin: 12px 0 14px; font-weight: 800; font-stretch: 112%; font-size: clamp
 @media (max-width: 560px) { .opts.imgs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .opt.opt-img { display: flex; flex-direction: column; gap: 8px; padding: 8px; }
 .pic { display: grid; place-items: center; height: 104px; padding: 8px; background: var(--mount); border-radius: 4px; }
-.pic img { display: block; width: auto; max-height: 100%; }
+.pic img { display: block; width: auto; max-height: 88px; }
 .maps .pic { height: auto; aspect-ratio: 3 / 2; padding: 4px; }
-.maps .pic img { width: 100%; height: 100%; object-fit: contain; }
+.maps .pic img { width: 100%; height: 100%; max-height: none; object-fit: contain; }
 .pick { display: flex; align-items: center; justify-content: center; gap: 8px; }
 .pick .box { margin-top: 0; }
 .pick .letter { line-height: 18px; }
@@ -281,6 +281,55 @@ h1 { margin: 12px 0 14px; font-weight: 800; font-stretch: 112%; font-size: clamp
 .g-opt b { font: 400 13px/22.5px var(--f-mono); color: var(--ink-3); }
 .g-note { margin: 14px 0 0; font: 400 12px/1.3 var(--f-mono); color: var(--ink-3); }
 
+/* ---------- rapid fire: full-screen, keyboard-first (Q W E R = a b c d) ---------- */
+.icon-btn.accent { background: var(--blue); border-color: var(--blue); color: var(--on-blue); font-weight: 600; }
+.icon-btn.accent:hover { background: var(--blue-strong); border-color: var(--blue-strong); color: var(--on-blue); }
+.icon-btn.accent .n { font: 400 12px/1 var(--f-mono); opacity: .8; font-variant-numeric: tabular-nums; }
+.icon-btn:disabled { cursor: default; opacity: .45; pointer-events: none; }
+.icon-btn.accent svg { fill: currentColor; stroke: none; }
+html.rf-lock { overflow: hidden; }
+.rf { position: fixed; inset: 0; z-index: 50; overflow-y: auto; background: var(--paper); outline: none; overscroll-behavior: contain; }
+.rf-wrap { max-width: 720px; min-height: 100%; margin: 0 auto; padding: max(20px, env(safe-area-inset-top, 0px)) 20px 36px; }
+.rf-top { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; }
+.rf-title { margin-right: auto; font: 400 12px/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+.rf-count { font: 400 14px/1 var(--f-mono); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.rf-count b { font-weight: 400; color: var(--ink); }
+.rf-prog { height: 4px; margin-top: 14px; border-radius: 2px; background: var(--blue-soft); overflow: hidden; }
+.rf-prog i { display: block; height: 100%; width: calc(var(--p, 0) * 100%); background: var(--blue); transition: width .15s ease; }
+.rf-card { margin-top: 18px; padding: 18px 22px 22px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-1); transition: border-color .12s; }
+.rf-card.is-solved { border-color: var(--green-line); }
+.rf-card.shake { animation: shake .32s ease; }
+.rf-meta { margin: 0 0 8px; font: 400 12px/1.3 var(--f-mono); color: var(--ink-3); }
+.rf .q { font-size: 21px; }
+.rf .q .en { font-size: 18px; }
+.rf .qimg img { max-height: min(300px, 30vh); }
+.rf-opts { margin-top: 18px; }
+.rf-opts .opt { grid-template-columns: 18px 24px minmax(0, 1fr); width: 100%; padding: 12px 14px; text-align: left; font: inherit; color: inherit; }
+.rf-opts .txt { font-size: 17px; }
+.rf-opts .txt .en { font-size: 15.5px; }
+.rf-opts .opt:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.rf-opts .letter { line-height: 22px; }
+.rf .k-key { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 5px; background: var(--surface); border: 1px solid var(--line-2); border-bottom-width: 2px; border-radius: 4px; font: 500 12px/1 var(--f-mono); color: var(--ink-2); }
+.rf .opt.is-right .k-key { border-color: var(--green-line); }
+.rf .opt.is-wrong .k-key { border-color: var(--red-line); opacity: .6; }
+.rf .k-abc { display: none; font: 400 13px/22px var(--f-mono); color: var(--ink-3); }
+.rf-keys { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 18px 0 0; font: 400 12.5px/1.2 var(--f-mono); color: var(--ink-3); }
+.rf-keys span { display: inline-flex; align-items: center; gap: 4px; }
+.rf-keys .k-key { min-width: 20px; height: 20px; }
+.rf-end { margin-top: 18px; }
+.rf.ended .rf-keys { display: none; }
+@media (hover: none) {
+  .rf .k-key { display: none; }
+  .rf .k-abc { display: inline; }
+  .rf-keys { display: none; }
+}
+@media (max-width: 520px) {
+  .rf-wrap { padding-inline: 14px; }
+  .rf-card { padding: 14px 14px 16px; }
+  .rf .q { font-size: 19px; }
+  .rf-opts .opt { padding: 11px 11px; }
+}
+
 .toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 40; display: flex; align-items: center; gap: 14px; padding: 7px 7px 7px 16px; background: var(--ink); color: var(--paper); border-radius: 8px; box-shadow: var(--shadow-2); font: 500 14px/1.2 var(--f-sans); white-space: nowrap; transform: translateX(-50%); }
 .toast button { all: unset; cursor: pointer; padding: 7px 12px; border-radius: 5px; font-weight: 650; background: color-mix(in srgb, var(--paper) 14%, transparent); }
 .toast button:hover { background: color-mix(in srgb, var(--paper) 26%, transparent); }
@@ -299,7 +348,8 @@ h1 { margin: 12px 0 14px; font-weight: 800; font-stretch: 112%; font-size: clamp
 }
 @media (prefers-reduced-motion: reduce) {
   .card.shake { animation: none; }
-  .card.collapsing, .gloss, .gloss.on, .t-bar i { transition: none; }
+  .card.collapsing, .gloss, .gloss.on, .t-bar i, .rf-prog i { transition: none; }
+  .rf-card.shake { animation: none; }
 }
 </style>
 </head>
@@ -349,6 +399,7 @@ h1 { margin: 12px 0 14px; font-weight: 800; font-stretch: 112%; font-size: clamp
       <button type="button" data-order="random" aria-pressed="false">Shuffled</button>
     </div>
     <button type="button" class="icon-btn" id="reshuffle" hidden><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M11.5 5.2A4.8 4.8 0 0 0 2.6 4.1M2.5 8.8a4.8 4.8 0 0 0 8.9 1.1"/><path d="M2.4 1.6v2.8h2.8M11.6 12.4V9.6H8.8"/></svg>Reshuffle</button>
+    <button type="button" class="icon-btn accent" id="rfStart" title="One question at a time, answered with Q W E R"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M8.2.8 2.6 7.8h3.7L5.6 13.2l5.8-7.2H7.5z"/></svg>Rapid fire <span class="n" id="rfN">0</span></button>
     <div class="summary">
       <span><b id="shownN">350</b> shown</span>
       <button type="button" class="chip" id="chipTopic" hidden title="Clear topic filter"><span lang="de"></span><span aria-hidden="true">✕</span></button>
@@ -369,6 +420,21 @@ h1 { margin: 12px 0 14px; font-weight: 800; font-stretch: 112%; font-size: clamp
   <div class="gloss" id="gloss" aria-hidden="true"></div>
   <div class="toast" id="toast" role="status" hidden><span id="toastMsg"></span><button type="button" id="toastUndo">Undo</button></div>
   <div class="sr-only" id="sr" aria-live="assertive"></div>
+</div>
+
+<div class="rf" id="rf" role="dialog" aria-modal="true" aria-label="Rapid fire" tabindex="-1" hidden>
+  <div class="rf-wrap">
+    <div class="rf-top">
+      <span class="rf-title">Rapid fire</span>
+      <span class="rf-count"><b id="rfDone">0</b> / <span id="rfTotal">0</span></span>
+      <label class="switch" title="Show the English translation under every line"><input type="checkbox" id="rf-en">English</label>
+      <button type="button" class="icon-btn" id="rfExit">Exit</button>
+    </div>
+    <div class="rf-prog"><i id="rfProg"></i></div>
+    <div id="rfBody"></div>
+    <p class="rf-keys"><span><kbd class="k-key">Q</kbd><kbd class="k-key">W</kbd><kbd class="k-key">E</kbd><kbd class="k-key">R</kbd> answer a–d</span><span><kbd class="k-key">Space</kbd> skip</span><span><kbd class="k-key">Esc</kbd> exit</span></p>
+    <div class="sr-only" id="rfSr" aria-live="polite"></div>
+  </div>
 </div>
 
 <!-- Question data: one question per line. "q"/"o" = German from the PDF, "qe"/"oe" = English, "a" = index of the correct answer (0 = a). -->
@@ -870,15 +936,20 @@ h1 { margin: 12px 0 14px; font-weight: 800; font-stretch: 112%; font-size: clamp
     if (S.status === 'review') return !!S.review[q.i];
     return true;
   }
+  // Rapid fire drills what is still unfinished in the current filters, or the review list when that tab is open.
+  const inRapidPool = q => inScope(q) && (S.status === 'review' ? !!S.review[q.i] : !S.done[q.i]);
   function updateCounts() {
-    let open = 0, rev = 0, all = 0, doneN = 0, revN = 0;
+    let open = 0, rev = 0, all = 0, doneN = 0, revN = 0, rapid = 0;
     const secDone = [0, 0, 0, 0, 0, 0];
     for (const q of Q) {
       const d = !!S.done[q.i], r = !!S.review[q.i];
       if (d) { doneN++; secDone[q.s]++; }
       if (r) revN++;
       if (inScope(q)) { all++; if (!d) open++; if (r) rev++; }
+      if (inRapidPool(q)) rapid++;
     }
+    $('#rfN').textContent = rapid;
+    $('#rfStart').disabled = !rapid;
     $('#n-open').textContent = open;
     $('#n-review').textContent = rev;
     $('#n-all').textContent = all;
@@ -1112,6 +1183,142 @@ h1 { margin: 12px 0 14px; font-weight: 800; font-stretch: 112%; font-size: clamp
     S.done = {}; S.miss = {}; S.review = {};
     save(); closeReset(); hideToast(); applyView(true);
     announce('Progress reset.');
+  });
+
+  /* ---------- rapid fire ---------- */
+  // One question at a time; Q W E R pick the answer at position a–d (so "Shuffle answers" applies).
+  // Scoring matches the list: a wrong pick marks the question for review and keeps it on screen,
+  // a right pick marks it learned and moves on at once.
+  const rf = $('#rf'), rfBody = $('#rfBody'), rfSr = $('#rfSr'), rfOpener = $('#rfStart');
+  const RF_DELAY = reduced.matches ? 60 : 130;
+  let R = null;   // active session: { queue, total, cleared, first, slipped, order, slip, busy, ended }
+
+  function rapidIds() {
+    const ids = S.order === 'random' ? shuffle(Q.map(q => q.i), S.seed) : Q.map(q => q.i);
+    return ids.filter(id => inRapidPool(byId.get(id)));
+  }
+  function rfOpen(ids) {
+    if (!ids.length) return;
+    hideGloss();
+    hideToast();
+    R = { queue: ids.slice(), total: ids.length, cleared: 0, first: 0, slipped: [], order: [], slip: false, busy: false, ended: false };
+    rf.classList.toggle('all-en', S.allEn);
+    rf.classList.remove('ended');
+    $('#rf-en').checked = S.allEn;
+    $('#rfTotal').textContent = R.total;
+    page.inert = true;
+    document.documentElement.classList.add('rf-lock');
+    rf.hidden = false;
+    rf.scrollTop = 0;
+    rfShow();
+    rf.focus({ preventScroll: true });
+  }
+  function rfClose() {
+    if (!R) return;
+    R = null;
+    rf.hidden = true;
+    page.inert = false;
+    document.documentElement.classList.remove('rf-lock');
+    applyView(false);
+    if (!rfOpener.disabled) rfOpener.focus({ preventScroll: true });
+  }
+  function rfProgress() {
+    $('#rfDone').textContent = R.cleared;
+    $('#rfProg').style.setProperty('--p', R.cleared / R.total);
+  }
+  function rfShow() {
+    rfProgress();
+    if (!R.queue.length) return rfEnd();
+    const q = byId.get(R.queue[0]);
+    R.order = optOrder(q);
+    R.slip = false;
+    R.busy = false;
+    const opts = R.order.map((o, pos) => {
+      const key = `<span class="letter"><kbd class="k-key">${'QWER'[pos]}</kbd><span class="k-abc">${LETTERS[pos]}</span></span>`;
+      const box = `<span class="box">${TICK}</span>`;
+      return q.oi
+        ? `<button type="button" class="opt opt-img" data-pos="${pos}"><span class="pic"><img src="${IMG[q.oi[o]]}" alt="${esc(q.alts[o])}" lang="en" decoding="async"></span><span class="pick">${box}${key}</span></button>`
+        : `<button type="button" class="opt" data-pos="${pos}">${box}${key}<span class="txt"><span class="de">${esc(q.o[o])}</span><span class="en" lang="en">${esc(q.oe[o])}</span></span></button>`;
+    }).join('');
+    rfBody.innerHTML =
+      `<article class="rf-card" lang="de">` +
+        `<p class="rf-meta" lang="en">Nr.&nbsp;${q.i} · ${esc(SEC[q.s].de)}</p>` +
+        `<h2 class="q"><span class="de">${esc(q.q)}</span><span class="en" lang="en">${esc(q.qe)}</span></h2>` +
+        (q.img ? `<figure class="qimg"><img src="${IMG[q.img]}" alt="${esc(q.alt)}" lang="en" decoding="async"></figure>` : '') +
+        `<div class="opts rf-opts${q.oi ? ' imgs' + (q.oi[0].startsWith('map') ? ' maps' : '') : ''}">${opts}</div>` +
+        (q.credit ? `<p class="credit">${esc(q.credit)}</p>` : '') +
+      `</article>`;
+    // keep focus off the answer buttons so Space always means "skip"
+    if (!rf.contains(document.activeElement) || rfBody.contains(document.activeElement)) rf.focus({ preventScroll: true });
+    rf.scrollTop = 0;
+  }
+  function rfPick(pos) {
+    if (!R || R.busy || R.ended) return;
+    const btn = rfBody.querySelector(`.opt[data-pos="${pos}"]`);
+    if (!btn || btn.classList.contains('is-wrong')) return;
+    const q = byId.get(R.queue[0]), card = btn.closest('.rf-card');
+    btn.classList.add(R.order[pos] === q.a ? 'is-right' : 'is-wrong');
+    if (R.order[pos] !== q.a) {
+      R.slip = true;
+      S.miss[q.i] = (S.miss[q.i] || 0) + 1;
+      S.review[q.i] = 1;
+      save();
+      if (!reduced.matches) { card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake'); }
+      rfSr.textContent = 'Wrong. Try another answer.';
+      return;
+    }
+    R.busy = true;
+    card.classList.add('is-solved');
+    S.done[q.i] = Date.now();
+    if (!R.slip) { delete S.review[q.i]; R.first++; } else R.slipped.push(q.i);
+    save();
+    R.queue.shift();
+    R.cleared++;
+    rfProgress();
+    setTimeout(() => { if (R) rfShow(); }, RF_DELAY);
+  }
+  function rfSkip() {
+    if (!R || R.busy || R.ended || R.queue.length < 2) return;
+    R.queue.push(R.queue.shift());
+    rfShow();
+  }
+  function rfEnd() {
+    R.ended = true;
+    rf.classList.add('ended');
+    const n = R.slipped.length;
+    rfBody.innerHTML =
+      `<div class="empty rf-end"><h3>Round complete</h3>` +
+      `<p>${R.total} question${R.total === 1 ? '' : 's'} cleared · ${R.first} right on the first try${n ? ` · ${n} with a slip` : ''}.</p>` +
+      `<div class="empty-actions">` +
+        (n ? `<button type="button" class="btn primary" data-rf="again">Drill the ${n} you missed</button>` : '') +
+        `<button type="button" class="btn${n ? '' : ' primary'}" data-rf="close">Back to the list</button>` +
+      `</div></div>`;
+    rfBody.querySelector('.btn').focus({ preventScroll: true });
+  }
+
+  rfOpener.addEventListener('click', () => rfOpen(rapidIds()));
+  $('#rfExit').addEventListener('click', rfClose);
+  rfBody.addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b || !R) return;
+    if (b.dataset.pos) rfPick(+b.dataset.pos);
+    else if (b.dataset.rf === 'close') rfClose();
+    else if (b.dataset.rf === 'again') rfOpen(R.slipped.slice());
+  });
+  $('#rf-en').addEventListener('change', e => {
+    S.allEn = e.target.checked; save();
+    rf.classList.toggle('all-en', S.allEn);
+    syncControls(); equaliseRows(true);
+    e.target.blur();
+    rf.focus({ preventScroll: true });
+  });
+  document.addEventListener('keydown', e => {
+    if (!R) return;
+    if (e.key === 'Escape') { rfClose(); return; }
+    if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+    const pos = e.key.length === 1 ? 'qwer'.indexOf(e.key.toLowerCase()) : -1;
+    if (pos >= 0) { e.preventDefault(); rfPick(pos); }
+    else if (e.key === ' ' && !(e.target instanceof Element && e.target.closest('button, input'))) { e.preventDefault(); rfSkip(); }
   });
 
   /* ---------- English on hover ---------- */

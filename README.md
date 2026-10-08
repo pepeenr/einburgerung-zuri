@@ -9,6 +9,7 @@ An unofficial practice page for the Canton of Zürich naturalisation knowledge t
 - Hover over a question to read it in English, or switch on **English inline** to show every translation (the way to go on a phone).
 - The ⓘ icon on each card shows the question number, topic, PDF page and how often you got it wrong.
 - Tick the correct answer and the question disappears. A wrong answer turns red and puts the question on the *To review* list, where it stays until you get it right on the first try.
+- **Rapid fire** (button in the toolbar) shows your unfinished questions one at a time, full screen. Answer with the keyboard: **Q W E R** = a b c d, **Space** skips, **Esc** exits. A right answer moves on at once; a wrong one turns red and you try again, with the same scoring as the list. It drills whatever the list is set to: the current topic and level filters, the current order, and the *To review* list when that tab is open. At the end you can drill just the ones you missed.
 - Show the questions in PDF order or shuffled, filter by topic or by level (Bund, Kanton, Gemeinde), and optionally shuffle the answers.
 - Progress is stored in your browser (localStorage), so each browser and device keeps its own.
 
