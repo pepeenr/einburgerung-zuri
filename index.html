@@ -317,7 +317,15 @@ html.rf-lock { overflow: hidden; }
 .rf-keys span { display: inline-flex; align-items: center; gap: 4px; }
 .rf-keys .k-key { min-width: 20px; height: 20px; }
 .rf-end { margin-top: 18px; }
-.rf.ended .rf-keys { display: none; }
+.rf.ended .rf-keys, .rf.taps .rf-keys { display: none; }
+.rf.taps .k-key { display: none; }
+.rf.taps .k-abc { display: inline; }
+.rf-slots { display: flex; gap: 12px; margin: 0 0 14px; }
+.rf-slot { display: grid; justify-items: center; gap: 6px; font: 400 12px/1 var(--f-mono); color: var(--ink-3); }
+.rf .rf-slot .k-key { min-width: 48px; height: 48px; padding: 0 8px; border-radius: 6px; font-size: 20px; color: var(--ink); }
+.rf-slot.is-next .k-key { border-color: var(--blue); box-shadow: 0 0 0 2px var(--blue-soft); }
+.rf-slot.is-next { color: var(--blue); }
+.rf-note { min-height: 1.4em; margin: 0 0 12px; font: 400 13px/1.4 var(--f-mono); color: var(--red); }
 @media (hover: none) {
   .rf .k-key { display: none; }
   .rf .k-abc { display: inline; }
@@ -432,7 +440,7 @@ html.rf-lock { overflow: hidden; }
     </div>
     <div class="rf-prog"><i id="rfProg"></i></div>
     <div id="rfBody"></div>
-    <p class="rf-keys"><span><kbd class="k-key">Q</kbd><kbd class="k-key">W</kbd><kbd class="k-key">E</kbd><kbd class="k-key">R</kbd> answer a–d</span><span><kbd class="k-key">Space</kbd> skip</span><span><kbd class="k-key">Esc</kbd> exit</span></p>
+    <p class="rf-keys" id="rfKeys"></p>
     <div class="sr-only" id="rfSr" aria-live="polite"></div>
   </div>
 </div>
@@ -1186,22 +1194,28 @@ html.rf-lock { overflow: hidden; }
   });
 
   /* ---------- rapid fire ---------- */
-  // One question at a time; Q W E R pick the answer at position a–d (so "Shuffle answers" applies).
-  // Scoring matches the list: a wrong pick marks the question for review and keeps it on screen,
-  // a right pick marks it learned and moves on at once.
-  const rf = $('#rf'), rfBody = $('#rfBody'), rfSr = $('#rfSr'), rfOpener = $('#rfStart');
+  // One question at a time. A session starts by asking for four keys; they stand for the answers at
+  // positions a–d (so "Shuffle answers" applies) until the session is closed. Scoring matches the list:
+  // a wrong pick marks the question for review and keeps it on screen, a right pick marks it learned
+  // and moves on at once.
+  const rf = $('#rf'), rfBody = $('#rfBody'), rfSr = $('#rfSr'), rfOpener = $('#rfStart'), rfKeys = $('#rfKeys');
   const RF_DELAY = reduced.matches ? 60 : 130;
-  let R = null;   // active session: { queue, total, cleared, first, slipped, order, slip, busy, ended }
+  // R.keys: the four chosen keys, still filling up during setup; null = answers are tapped, no keyboard
+  let R = null;   // active session: { queue, total, cleared, first, slipped, keys, note, order, slip, busy, ended }
+  const cap = k => { const u = k.toUpperCase(); return u.length === k.length ? u : k; };   // ß would become SS
 
   function rapidIds() {
     const ids = S.order === 'random' ? shuffle(Q.map(q => q.i), S.seed) : Q.map(q => q.i);
     return ids.filter(id => inRapidPool(byId.get(id)));
   }
-  function rfOpen(ids) {
+  const rfSettingUp = () => !!R.keys && R.keys.length < 4;
+  // keys: carry the choice over when drilling the missed ones; otherwise ask (unless there is no keyboard to ask)
+  function rfOpen(ids, keys) {
     if (!ids.length) return;
     hideGloss();
     hideToast();
-    R = { queue: ids.slice(), total: ids.length, cleared: 0, first: 0, slipped: [], order: [], slip: false, busy: false, ended: false };
+    if (keys === undefined) keys = canHover.matches ? [] : null;
+    R = { queue: ids.slice(), total: ids.length, cleared: 0, first: 0, slipped: [], keys: keys && keys.slice(), note: '', order: [], slip: false, busy: false, ended: false };
     rf.classList.toggle('all-en', S.allEn);
     rf.classList.remove('ended');
     $('#rf-en').checked = S.allEn;
@@ -1226,15 +1240,59 @@ html.rf-lock { overflow: hidden; }
     $('#rfDone').textContent = R.cleared;
     $('#rfProg').style.setProperty('--p', R.cleared / R.total);
   }
+  // keep focus off the answer buttons so Space always means "skip"
+  function rfRefocus() {
+    if (!rf.contains(document.activeElement) || rfBody.contains(document.activeElement)) rf.focus({ preventScroll: true });
+    rf.scrollTop = 0;
+  }
+  const kbds = list => list.map(k => `<kbd class="k-key">${esc(k)}</kbd>`).join('');
+  // First step of a session: ask for the four keys, in the order of answers a, b, c, d.
+  function rfSetup() {
+    const n = R.keys.length;
+    rf.classList.remove('taps');
+    rfKeys.innerHTML = `<span>${kbds(['Backspace'])} undo</span><span>${kbds(['Esc'])} exit</span>`;
+    rfBody.innerHTML =
+      `<div class="empty rf-setup"><h3>Choose your keys</h3>` +
+      `<p>Press four keys, one after the other: the first is for answer a, then b, c and d. They stay the same until you leave rapid fire.</p>` +
+      `<div class="rf-slots" aria-live="polite">` +
+        [0, 1, 2, 3].map(i => `<div class="rf-slot${i === n ? ' is-next' : ''}"><kbd class="k-key">${i < n ? esc(cap(R.keys[i])) : '&nbsp;'}</kbd><span>${LETTERS[i]}</span></div>`).join('') +
+      `</div>` +
+      `<p class="rf-note" role="status">${esc(R.note)}</p>` +
+      `<div class="empty-actions"><button type="button" class="btn" data-rf="taps">Tap the answers instead</button></div></div>`;
+    rfRefocus();
+  }
+  // One keypress during setup. Space, Escape and Backspace keep their jobs; every key must be different.
+  function rfLearn(e) {
+    if (e.key === 'Backspace') {
+      e.preventDefault();
+      if (R.keys.length) R.keys.pop();
+      R.note = '';
+      return rfSetup();
+    }
+    if (e.key.length !== 1 || e.key === ' ') return;
+    e.preventDefault();
+    const k = e.key.toLowerCase();
+    if (R.keys.includes(k)) { R.note = `${cap(k)} is already taken. Pick another key.`; return rfSetup(); }
+    R.keys.push(k);
+    R.note = '';
+    rfSetup();
+    if (R.keys.length === 4) {
+      R.busy = true;   // let the filled-in row register before the first question replaces it
+      setTimeout(() => { if (R) rfShow(); }, reduced.matches ? 60 : 320);
+    }
+  }
   function rfShow() {
     rfProgress();
     if (!R.queue.length) return rfEnd();
+    if (rfSettingUp()) return rfSetup();
     const q = byId.get(R.queue[0]);
     R.order = optOrder(q);
     R.slip = false;
     R.busy = false;
+    rf.classList.toggle('taps', !R.keys);
+    rfKeys.innerHTML = R.keys ? `<span>${kbds(R.keys.map(cap))} answer a–d</span><span>${kbds(['Space'])} skip</span><span>${kbds(['Esc'])} exit</span>` : '';
     const opts = R.order.map((o, pos) => {
-      const key = `<span class="letter"><kbd class="k-key">${'QWER'[pos]}</kbd><span class="k-abc">${LETTERS[pos]}</span></span>`;
+      const key = `<span class="letter"><kbd class="k-key">${R.keys ? esc(cap(R.keys[pos])) : ''}</kbd><span class="k-abc">${LETTERS[pos]}</span></span>`;
       const box = `<span class="box">${TICK}</span>`;
       return q.oi
         ? `<button type="button" class="opt opt-img" data-pos="${pos}"><span class="pic"><img src="${IMG[q.oi[o]]}" alt="${esc(q.alts[o])}" lang="en" decoding="async"></span><span class="pick">${box}${key}</span></button>`
@@ -1248,9 +1306,7 @@ html.rf-lock { overflow: hidden; }
         `<div class="opts rf-opts${q.oi ? ' imgs' + (q.oi[0].startsWith('map') ? ' maps' : '') : ''}">${opts}</div>` +
         (q.credit ? `<p class="credit">${esc(q.credit)}</p>` : '') +
       `</article>`;
-    // keep focus off the answer buttons so Space always means "skip"
-    if (!rf.contains(document.activeElement) || rfBody.contains(document.activeElement)) rf.focus({ preventScroll: true });
-    rf.scrollTop = 0;
+    rfRefocus();
   }
   function rfPick(pos) {
     if (!R || R.busy || R.ended) return;
@@ -1278,7 +1334,7 @@ html.rf-lock { overflow: hidden; }
     setTimeout(() => { if (R) rfShow(); }, RF_DELAY);
   }
   function rfSkip() {
-    if (!R || R.busy || R.ended || R.queue.length < 2) return;
+    if (!R || R.busy || R.ended || rfSettingUp() || R.queue.length < 2) return;
     R.queue.push(R.queue.shift());
     rfShow();
   }
@@ -1303,7 +1359,8 @@ html.rf-lock { overflow: hidden; }
     if (!b || !R) return;
     if (b.dataset.pos) rfPick(+b.dataset.pos);
     else if (b.dataset.rf === 'close') rfClose();
-    else if (b.dataset.rf === 'again') rfOpen(R.slipped.slice());
+    else if (b.dataset.rf === 'again') rfOpen(R.slipped.slice(), R.keys);
+    else if (b.dataset.rf === 'taps') { R.keys = null; rfShow(); }
   });
   $('#rf-en').addEventListener('change', e => {
     S.allEn = e.target.checked; save();
@@ -1316,7 +1373,8 @@ html.rf-lock { overflow: hidden; }
     if (!R) return;
     if (e.key === 'Escape') { rfClose(); return; }
     if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
-    const pos = e.key.length === 1 ? 'qwer'.indexOf(e.key.toLowerCase()) : -1;
+    if (rfSettingUp()) return rfLearn(e);
+    const pos = R.keys && e.key.length === 1 ? R.keys.indexOf(e.key.toLowerCase()) : -1;
     if (pos >= 0) { e.preventDefault(); rfPick(pos); }
     else if (e.key === ' ' && !(e.target instanceof Element && e.target.closest('button, input'))) { e.preventDefault(); rfSkip(); }
   });
