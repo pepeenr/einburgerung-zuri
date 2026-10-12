@@ -284,7 +284,8 @@ h1 { margin: 12px 0 14px; font-weight: 800; font-stretch: 112%; font-size: clamp
 /* ---------- rapid fire: full-screen, keyboard-first (Q W E R = a b c d) ---------- */
 .icon-btn.accent { background: var(--blue); border-color: var(--blue); color: var(--on-blue); font-weight: 600; }
 .icon-btn.accent:hover { background: var(--blue-strong); border-color: var(--blue-strong); color: var(--on-blue); }
-.icon-btn.accent .n { font: 400 12px/1 var(--f-mono); opacity: .8; font-variant-numeric: tabular-nums; }
+.icon-btn .n { font: 400 12px/1 var(--f-mono); opacity: .7; font-variant-numeric: tabular-nums; }
+.icon-btn.accent .n { opacity: .8; }
 .icon-btn:disabled { cursor: default; opacity: .45; pointer-events: none; }
 .icon-btn.accent svg { fill: currentColor; stroke: none; }
 html.rf-lock { overflow: hidden; }
@@ -317,6 +318,20 @@ html.rf-lock { overflow: hidden; }
 .rf-keys span { display: inline-flex; align-items: center; gap: 4px; }
 .rf-keys .k-key { min-width: 20px; height: 20px; }
 .rf-end { margin-top: 18px; }
+/* blind test: the pick is locked in without saying whether it was right */
+.rf .opt.is-picked { background: var(--blue-wash); border-color: var(--blue); }
+.rf .opt.is-picked .box { background: var(--blue); border-color: var(--blue); }
+.rf .opt.is-picked .box .ok { opacity: 1; }
+.rf-score { margin: 0 0 16px; font-weight: 750; font-stretch: 108%; font-size: 30px; line-height: 1.1; color: var(--ink); }
+.rf-score span { font-weight: 500; font-size: 18px; color: var(--ink-3); }
+.rf-miss { display: grid; gap: 10px; margin: 22px 0 0; padding: 0; list-style: none; }
+.rf-miss li { display: grid; gap: 4px; padding: 12px 14px; background: var(--surface-2); border-radius: 5px; font-size: 15px; line-height: 1.4; }
+.rf-miss .mq { font-weight: 650; }
+.rf-miss .en { font: italic 400 14.5px/1.4 var(--f-serif); color: var(--ink-2); }
+.rf-miss .mine { color: var(--red); }
+.rf-miss .ans { color: var(--green); }
+.rf-miss b { font: 400 11.5px/1 var(--f-mono); letter-spacing: .04em; text-transform: uppercase; margin-right: 6px; }
+.empty .rf-misshead { margin: 22px 0 0; font: 400 12px/1.2 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
 .rf.ended .rf-keys, .rf.taps .rf-keys { display: none; }
 .rf.taps .k-key { display: none; }
 .rf.taps .k-abc { display: inline; }
@@ -407,7 +422,8 @@ html.rf-lock { overflow: hidden; }
       <button type="button" data-order="random" aria-pressed="false">Shuffled</button>
     </div>
     <button type="button" class="icon-btn" id="reshuffle" hidden><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M11.5 5.2A4.8 4.8 0 0 0 2.6 4.1M2.5 8.8a4.8 4.8 0 0 0 8.9 1.1"/><path d="M2.4 1.6v2.8h2.8M11.6 12.4V9.6H8.8"/></svg>Reshuffle</button>
-    <button type="button" class="icon-btn accent" id="rfStart" title="One question at a time, answered with Q W E R"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M8.2.8 2.6 7.8h3.7L5.6 13.2l5.8-7.2H7.5z"/></svg>Rapid fire <span class="n" id="rfN">0</span></button>
+    <button type="button" class="icon-btn accent" id="rfStart" title="One question at a time, answered with four keys you choose"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M8.2.8 2.6 7.8h3.7L5.6 13.2l5.8-7.2H7.5z"/></svg>Rapid fire <span class="n" id="rfN">0</span></button>
+    <button type="button" class="icon-btn" id="blindStart" title="Test: 50 random questions, answers only, no feedback until the end"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M1 7s2.1-3.8 6-3.8S13 7 13 7s-2.1 3.8-6 3.8S1 7 1 7z"/><circle cx="7" cy="7" r="1.6"/><path d="M2.4 12 11.6 2"/></svg>Blind test <span class="n" id="blindN">0</span></button>
     <div class="summary">
       <span><b id="shownN">350</b> shown</span>
       <button type="button" class="chip" id="chipTopic" hidden title="Clear topic filter"><span lang="de"></span><span aria-hidden="true">✕</span></button>
@@ -433,7 +449,7 @@ html.rf-lock { overflow: hidden; }
 <div class="rf" id="rf" role="dialog" aria-modal="true" aria-label="Rapid fire" tabindex="-1" hidden>
   <div class="rf-wrap">
     <div class="rf-top">
-      <span class="rf-title">Rapid fire</span>
+      <span class="rf-title" id="rfTitle">Rapid fire</span>
       <span class="rf-count"><b id="rfDone">0</b> / <span id="rfTotal">0</span></span>
       <label class="switch" title="Show the English translation under every line"><input type="checkbox" id="rf-en">English</label>
       <button type="button" class="icon-btn" id="rfExit">Exit</button>
@@ -945,6 +961,7 @@ html.rf-lock { overflow: hidden; }
     return true;
   }
   // Rapid fire drills what is still unfinished in the current filters, or the review list when that tab is open.
+  const BLIND_N = 50;
   const inRapidPool = q => inScope(q) && (S.status === 'review' ? !!S.review[q.i] : !S.done[q.i]);
   function updateCounts() {
     let open = 0, rev = 0, all = 0, doneN = 0, revN = 0, rapid = 0;
@@ -958,6 +975,8 @@ html.rf-lock { overflow: hidden; }
     }
     $('#rfN').textContent = rapid;
     $('#rfStart').disabled = !rapid;
+    $('#blindN').textContent = Math.min(BLIND_N, all);
+    $('#blindStart').disabled = !all;
     $('#n-open').textContent = open;
     $('#n-review').textContent = rev;
     $('#n-all').textContent = all;
@@ -1210,12 +1229,18 @@ html.rf-lock { overflow: hidden; }
   }
   const rfSettingUp = () => !!R.keys && R.keys.length < 4;
   // keys: carry the choice over when drilling the missed ones; otherwise ask (unless there is no keyboard to ask)
-  function rfOpen(ids, keys) {
+  // Blind test: 50 random questions out of everything in the current topic/level filters (learned ones
+  // included), whatever the status tab says.
+  function blindIds() {
+    return shuffle(Q.filter(inScope).map(q => q.i), newSeed()).slice(0, BLIND_N);
+  }
+  function rfOpen(ids, keys, blind) {
     if (!ids.length) return;
     hideGloss();
     hideToast();
     if (keys === undefined) keys = canHover.matches ? [] : null;
-    R = { queue: ids.slice(), total: ids.length, cleared: 0, first: 0, slipped: [], keys: keys && keys.slice(), note: '', order: [], slip: false, busy: false, ended: false };
+    R = { queue: ids.slice(), total: ids.length, cleared: 0, first: 0, slipped: [], keys: keys && keys.slice(), note: '', order: [], slip: false, busy: false, ended: false, blind: !!blind, log: [] };
+    $('#rfTitle').textContent = blind ? 'Blind test' : 'Rapid fire';
     rf.classList.toggle('all-en', S.allEn);
     rf.classList.remove('ended');
     $('#rf-en').checked = S.allEn;
@@ -1229,12 +1254,14 @@ html.rf-lock { overflow: hidden; }
   }
   function rfClose() {
     if (!R) return;
+    const blind = R.blind;
     R = null;
     rf.hidden = true;
     page.inert = false;
     document.documentElement.classList.remove('rf-lock');
     applyView(false);
-    if (!rfOpener.disabled) rfOpener.focus({ preventScroll: true });
+    const opener = blind ? $('#blindStart') : rfOpener;
+    if (!opener.disabled) opener.focus({ preventScroll: true });
   }
   function rfProgress() {
     $('#rfDone').textContent = R.cleared;
@@ -1298,12 +1325,15 @@ html.rf-lock { overflow: hidden; }
         ? `<button type="button" class="opt opt-img" data-pos="${pos}"><span class="pic"><img src="${IMG[q.oi[o]]}" alt="${esc(q.alts[o])}" lang="en" decoding="async"></span><span class="pick">${box}${key}</span></button>`
         : `<button type="button" class="opt" data-pos="${pos}">${box}${key}<span class="txt"><span class="de">${esc(q.o[o])}</span><span class="en" lang="en">${esc(q.oe[o])}</span></span></button>`;
     }).join('');
-    rfBody.innerHTML =
-      `<article class="rf-card" lang="de">` +
-        `<p class="rf-meta" lang="en">Nr.&nbsp;${q.i} · ${esc(SEC[q.s].de)}</p>` +
+    // blind: the question, its picture and its number stay hidden, only the answers show
+    const head = R.blind
+      ? `<p class="rf-meta" lang="en">Question hidden · pick the answer you know is right</p>`
+      : `<p class="rf-meta" lang="en">Nr.&nbsp;${q.i} · ${esc(SEC[q.s].de)}</p>` +
         `<h2 class="q"><span class="de">${esc(q.q)}</span><span class="en" lang="en">${esc(q.qe)}</span></h2>` +
-        (q.img ? `<figure class="qimg"><img src="${IMG[q.img]}" alt="${esc(q.alt)}" lang="en" decoding="async"></figure>` : '') +
-        `<div class="opts rf-opts${q.oi ? ' imgs' + (q.oi[0].startsWith('map') ? ' maps' : '') : ''}">${opts}</div>` +
+        (q.img ? `<figure class="qimg"><img src="${IMG[q.img]}" alt="${esc(q.alt)}" lang="en" decoding="async"></figure>` : '');
+    rfBody.innerHTML =
+      `<article class="rf-card" lang="de">` + head +
+        `<div class="opts rf-opts${q.oi ? ' imgs' + (q.oi[0].startsWith('map') ? ' maps' : '') : ''}" role="group" aria-label="Answers">${opts}</div>` +
         (q.credit ? `<p class="credit">${esc(q.credit)}</p>` : '') +
       `</article>`;
     rfRefocus();
@@ -1313,6 +1343,17 @@ html.rf-lock { overflow: hidden; }
     const btn = rfBody.querySelector(`.opt[data-pos="${pos}"]`);
     if (!btn || btn.classList.contains('is-wrong')) return;
     const q = byId.get(R.queue[0]), card = btn.closest('.rf-card');
+    if (R.blind) {
+      // one attempt, no feedback, progress untouched; the result comes at the end
+      R.busy = true;
+      btn.classList.add('is-picked');
+      R.log.push({ id: q.i, pick: R.order[pos], ok: R.order[pos] === q.a });
+      R.queue.shift();
+      R.cleared++;
+      rfProgress();
+      setTimeout(() => { if (R) rfShow(); }, RF_DELAY);
+      return;
+    }
     btn.classList.add(R.order[pos] === q.a ? 'is-right' : 'is-wrong');
     if (R.order[pos] !== q.a) {
       R.slip = true;
@@ -1338,9 +1379,30 @@ html.rf-lock { overflow: hidden; }
     R.queue.push(R.queue.shift());
     rfShow();
   }
+  // Blind test result: the score, then every miss with its question revealed next to your pick and the right answer.
+  function rfEndBlind() {
+    const ok = R.log.filter(r => r.ok).length, miss = R.log.filter(r => !r.ok), n = miss.length;
+    const ans = (q, o) => q.oi ? `Picture: ${esc(q.alts[o])}` : `<span lang="de">${esc(q.o[o])}</span>`;
+    rfBody.innerHTML =
+      `<div class="empty rf-end"><h3>Test complete</h3>` +
+      `<p class="rf-score">${ok} of ${R.total} correct <span>· ${Math.round(100 * ok / R.total)}%</span></p>` +
+      `<div class="empty-actions">` +
+        (n ? `<button type="button" class="btn primary" data-rf="again">Practise the ${n} you missed</button>` : '') +
+        `<button type="button" class="btn${n ? '' : ' primary'}" data-rf="retest">New test</button>` +
+        `<button type="button" class="btn" data-rf="close">Back to the list</button>` +
+      `</div>` +
+      (n ? `<p class="rf-misshead">Missed</p><ol class="rf-miss">` + miss.map(r => {
+        const q = byId.get(r.id);
+        return `<li><span class="mq" lang="de">Nr. ${q.i} · ${esc(q.q)}</span><span class="en" lang="en">${esc(q.qe)}</span>` +
+          `<span class="mine"><b>You</b>${ans(q, r.pick)}</span><span class="ans"><b>Right</b>${ans(q, q.a)}</span></li>`;
+      }).join('') + `</ol>` : '') +
+      `</div>`;
+    rfBody.querySelector('.btn').focus({ preventScroll: true });
+  }
   function rfEnd() {
     R.ended = true;
     rf.classList.add('ended');
+    if (R.blind) return rfEndBlind();
     const n = R.slipped.length;
     rfBody.innerHTML =
       `<div class="empty rf-end"><h3>Round complete</h3>` +
@@ -1353,13 +1415,16 @@ html.rf-lock { overflow: hidden; }
   }
 
   rfOpener.addEventListener('click', () => rfOpen(rapidIds()));
+  $('#blindStart').addEventListener('click', () => rfOpen(blindIds(), undefined, true));
   $('#rfExit').addEventListener('click', rfClose);
   rfBody.addEventListener('click', e => {
     const b = e.target.closest('button');
     if (!b || !R) return;
     if (b.dataset.pos) rfPick(+b.dataset.pos);
     else if (b.dataset.rf === 'close') rfClose();
-    else if (b.dataset.rf === 'again') rfOpen(R.slipped.slice(), R.keys);
+    // practising the misses of a blind test is a normal rapid-fire round, so it counts toward progress
+    else if (b.dataset.rf === 'again') rfOpen(R.blind ? R.log.filter(r => !r.ok).map(r => r.id) : R.slipped.slice(), R.keys);
+    else if (b.dataset.rf === 'retest') rfOpen(blindIds(), R.keys, true);
     else if (b.dataset.rf === 'taps') { R.keys = null; rfShow(); }
   });
   $('#rf-en').addEventListener('change', e => {
